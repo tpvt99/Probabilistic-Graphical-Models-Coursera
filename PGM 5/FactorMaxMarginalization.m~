@@ -21,9 +21,9 @@
 %
 % Copyright (C) Daphne Koller, Stanford University, 2012
 
-% A = FactorMax.INPUT1;
-% V = FactorMax.INPUT2;
-function B = FactorMaxMarginalization(A, V)
+A = FactorMax.INPUT1;
+V = FactorMax.INPUT2;
+%function B = FactorMaxMarginalization(A, V)
 
 % Check for empty factor or variable list
 if (isempty(A.var) || isempty(V)), B = A; return; end;
@@ -40,7 +40,7 @@ end;
 % initialization
 % you should set them to the correct values in your code
 B.card = A.card(mapB);
-B.val = ones(1,prod(B.card)) * -Inf;
+B.val = zeros(1,prod(B.card));
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -52,9 +52,7 @@ assignments = IndexToAssignment(1:length(A.val), A.card);
 indxB = AssignmentToIndex(assignments(:, mapB), B.card);
 
 for i = 1:length(indxB)
-    if A.val(i) >= B.val(indxB(i))
-        B.val(indxB(i)) = A.val(i);
-    end
+    if A.val(i) >=
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -8,9 +8,8 @@
 %   is set to the final calibrated potentials.
 %
 % Copyright (C) Daphne Koller, Stanford University, 2012
-
-% P = MaxSumCalibrate.INPUT;
-% isMax = 1;
+% P = SumProdCalibrate.INPUT;
+% isMax = 0;
 function P = CliqueTreeCalibrate(P, isMax)
 
 
@@ -67,56 +66,41 @@ MESSAGES = repmat(struct('var', [], 'card', [], 'val', []), N, N);
          T = ComputeMarginal(T.var, T, []);
          MESSAGES(from, to) = T;
      end
- else
-     % log
+     
      for i = 1:length(P.cliqueList)
-         P.cliqueList(i).val = log(P.cliqueList(i).val);
+         initialBeliefs = P.cliqueList(i);
+         Factor = FactorProduct(initialBeliefs, struct('var', [], 'card', [], 'val', []));
+         edges = P.edges(i,:);
+         for r = 1:length(edges)
+             if edges(r) == 1 && r ~= i
+                 mess = MESSAGES(r,i);
+                 Factor = FactorProduct(Factor, mess);
+             end
+         end
+         P.cliqueList(i) = Factor;
      end
+ else
      while true
          [from, to] = GetNextCliques(P, MESSAGES);
          if from == 0 && to == 0
              break;
          end
          Phi = P.cliqueList(from);
-         Factor = FactorSum(Phi, ...
+         Factor = FactorProduct(Phi, ...
              struct('var', [], 'card', [], 'val', []));
          edges = P.edges(from,:); % 1-8
          for r = 1:length(edges)
              if edges(r) == 1 && r ~= to
                  mess = MESSAGES(r,from);
-                 Factor = FactorSum(Factor, mess);
+                 Factor = FactorProduct(Factor, mess);
              end
          end
 
-         diffNode = setdiff(P.cliqueList(from).var, ...
-             intersect(P.cliqueList(from).var, P.cliqueList(to).var));
-         Factor = FactorMaxMarginalization(Factor, diffNode);
+         sameNode = intersect(P.cliqueList(from).var, P.cliqueList(to).var);
+         Factor = FactorMaxMarginalization(Factor, sameNode);
          MESSAGES(from, to) = Factor;
      end
  end
- 
- % From messages to calculate beliefs
- for i = 1:length(P.cliqueList)
-     initialBeliefs = P.cliqueList(i);
-     if isMax == 0
-        Factor = FactorProduct(initialBeliefs, struct('var', [], 'card', [], 'val', []));
-     else
-        Factor = FactorSum(initialBeliefs, struct('var', [], 'card', [], 'val', []));
-     end
-     edges = P.edges(i,:);
-     for r = 1:length(edges)
-         if edges(r) == 1 && r ~= i
-             mess = MESSAGES(r,i);
-             if isMax == 0
-                Factor = FactorProduct(Factor, mess);
-             else
-                Factor = FactorSum(Factor, mess);
-             end
-         end
-     end
-     P.cliqueList(i) = Factor;
- end
- 
  
  
 
