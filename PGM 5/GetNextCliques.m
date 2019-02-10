@@ -23,52 +23,32 @@
 % Copyright (C) Daphne Koller, Stanford University, 2012
 
 % P = GetNextC.INPUT1;
-% messages = GetNextC.INPUT2;
+%messages = GetNextC.INPUT2;
 function [i, j] = GetNextCliques(P, messages)
 
 % initialization
 % you should set them to the correct values in your code
-i = 0;
-j = 0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % YOUR CODE HERE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 for i = 1:length(messages)
-    for j = i:length(messages)
+    for j = 1:length(messages)
         if P.edges(i,j) == 1
-            Phi = P.cliqueList(i);
-            Factor = FactorProduct(Phi, ...
-            struct('var', [], 'card', [], 'val', []));
-            edges = P.edges(i,:);
-            for r = 1:length(edges)
-                if edges(r) == 1 && r ~= j
-                    mess = messages(r,i);
-                    Factor = FactorProduct(Factor, mess);
+            if isempty(messages(i,j).var)
+                flag = 0;
+                edges = P.edges(i,:);
+                for r = 1:length(edges)
+                    if edges(r) == 1 && r ~= j
+                        if isempty(messages(r, i).var)
+                            flag = 1;
+                        end
+                    end
                 end
-            end
-            T = Factor;
-            sameNode = intersect(P.cliqueList(i).var, P.cliqueList(j).var);
-            for z = 1:length(Factor.var)
-                if ~ismember(Factor.var(z), sameNode)
-                    T = FactorMarginalization(T, ...
-                        [Factor.var(z)]);
+                if flag == 0
+                    return;
                 end
-            end
-            Factor = T;
-            disp(i);
-            disp(j);
-            if length(messages(i,j).val) ~= length(Factor.val)
-                messages(i,j).val = zeros(1, length(Factor.val));
-            end
-            if sum(abs(Factor.val - messages(i,j).val)) < 0.00001
-                continue;
-            else
-                nn = i;
-                i = j;
-                j = nn;
-                return;
             end
         end
     end

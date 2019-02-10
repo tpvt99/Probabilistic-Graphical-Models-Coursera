@@ -11,6 +11,9 @@
 %
 % Copyright (C) Daphne Koller, Stanford University, 2012
 
+% F = ExactMarginal.INPUT;
+% E = [];
+% isMax = 0;
 
 function M = ComputeExactMarginalsBP(F, E, isMax)
 
@@ -24,4 +27,9 @@ M = [];
 % Implement Exact and MAP Inference.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+if isMax == 0
+    cliqueTree = CreateCliqueTree(F, E);
+    calibrateTree = CliqueTreeCalibrate(cliqueTree, isMax);
 end
+
+

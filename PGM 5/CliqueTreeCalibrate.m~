@@ -8,9 +8,9 @@
 %   is set to the final calibrated potentials.
 %
 % Copyright (C) Daphne Koller, Stanford University, 2012
-% P = SumProdCalibrate.INPUT;
-% isMax = 0;
-function P = CliqueTreeCalibrate(P, isMax)
+P = SumProdCalibrate.INPUT;
+isMax = 0;
+%function P = CliqueTreeCalibrate(P, isMax)
 
 
 % Number of cliques in the tree.
@@ -70,14 +70,7 @@ MESSAGES = repmat(struct('var', [], 'card', [], 'val', []), N, N);
      for i = 1:length(P.cliqueList)
          initialBeliefs = P.cliqueList(i);
          Factor = FactorProduct(initialBeliefs, struct('var', [], 'card', [], 'val', []));
-         edges = P.edges(i,:);
-         for r = 1:length(edges)
-             if edges(r) == 1 && r ~= i
-                 mess = MESSAGES(r,i);
-                 Factor = FactorProduct(Factor, mess);
-             end
-         end
-         P.cliqueList(i) = Factor;
+         
      end
  end
 
