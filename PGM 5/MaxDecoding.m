@@ -13,7 +13,7 @@
 %
 % Copyright (C) Daphne Koller, Stanford University, 2012
 
-
+%M = MaxDecoded.INPUT;
 function A = MaxDecoding( M )
 
 
@@ -26,5 +26,10 @@ A = [];
 % Compute the best assignment for variables in the network.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+for i = 1:length(M)
+    [no, index] = max(M(i).val);
+    A = [A, index];
 end
+
+
 

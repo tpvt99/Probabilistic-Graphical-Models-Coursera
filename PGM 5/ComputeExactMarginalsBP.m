@@ -11,9 +11,9 @@
 %
 % Copyright (C) Daphne Koller, Stanford University, 2012
 
-% F = ExactMarginal.INPUT;
+% F = MaxMarginals.INPUT;
 % E = [];
-% isMax = 0;
+% isMax = 1;
 
 function M = ComputeExactMarginalsBP(F, E, isMax)
 
@@ -26,39 +26,47 @@ M = [];
 %
 % Implement Exact and MAP Inference.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-disp(isMax);
-if isMax == 0
-    cliqueTree = CreateCliqueTree(F, E);
-    calibrateTree = CliqueTreeCalibrate(cliqueTree, isMax);
-    varList = [];
-    cardList = [];
-    for i = 1:length(F)
-        for z = 1:length(F(i).var)
-            if ~ismember(F(i).var(z), varList)
-                varList = [varList, F(i).var(z)];
-                cardList = [cardList, F(i).card(z)];
-            end
+
+
+cliqueTree = CreateCliqueTree(F, E);
+calibrateTree = CliqueTreeCalibrate(cliqueTree, isMax);
+varList = [];
+cardList = [];
+for i = 1:length(F)
+    for z = 1:length(F(i).var)
+        if ~ismember(F(i).var(z), varList)
+            varList = [varList, F(i).var(z)];
+            cardList = [cardList, F(i).card(z)];
         end
     end
-    result = repmat(struct('var', [], 'card', [], 'val', []), length(varList), 1);
-    for i = 1:length(varList)
-        result(i).var = varList(i);
-        result(i).card = cardList(i);
-        for z = 1:length(calibrateTree.cliqueList)
-            if ismember(result(i).var, calibrateTree.cliqueList(z).var)
+end
+result = repmat(struct('var', [], 'card', [], 'val', []), length(varList), 1);
+for i = 1:length(varList)
+    result(i).var = varList(i);
+    result(i).card = cardList(i);
+    for z = 1:length(calibrateTree.cliqueList)
+        if ismember(result(i).var, calibrateTree.cliqueList(z).var)
+            if isMax == 0
                 F = FactorMarginalization(calibrateTree.cliqueList(z),...
                     calibrateTree.cliqueList(z).var(...
-                        find(result(i).var ~= calibrateTree.cliqueList(z).var)...
-                        ));
+                    find(result(i).var ~= calibrateTree.cliqueList(z).var)...
+                    ));
+                break;
+            else
+                F = FactorMaxMarginalization(calibrateTree.cliqueList(z),...
+                    calibrateTree.cliqueList(z).var(...
+                    find(result(i).var ~= calibrateTree.cliqueList(z).var)...
+                    ));
+                
                 break;
             end
         end
-        F = ComputeMarginal(F.var, F, []);
-        result(i).val = F.val;
-        M = result;
     end
-else
-    M = [];
+    if isMax == 0
+        F = ComputeMarginal(F.var, F, []);
+    end
+    result(i).val = F.val;
+    M = result;
 end
 
 
