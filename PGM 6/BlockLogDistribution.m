@@ -32,12 +32,14 @@
 %
 % Copyright (C) Daphne Koller, Stanford University, 2012
 
-V = exampleINPUT.t6a1;
-G = exampleINPUT.t6a2;
-F = exampleINPUT.t6a3;
-A = exampleINPUT.t6a4;
+% V = exampleINPUT.t6a1;
+% V=[1,2,3,4,6,7,10,14];
+% G = exampleINPUT.t6a2;
+% F = exampleINPUT.t6a3;
+% A = exampleINPUT.t6a4;
 
-%function LogBS = BlockLogDistribution(V, G, F, A)
+
+function LogBS = BlockLogDistribution(V, G, F, A)
 if length(unique(G.card(V))) ~= 1
     disp('WARNING: trying to block sample invalid variable set');
     return;
@@ -59,60 +61,55 @@ LogBS = zeros(1, d);
 % Also you should have only ONE for-loop, as for-loops are VERY slow in matlab
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-for i = 1:length(F)
-    F(i).val = log(F(i).val);
-end
+%1. find the factorList which is factors of variables in V(1)
+%2. Observe those factors where variables are not in V
+%3. Log-space those factors
+%4. Add them together
+%5. Observe variable in V
+%6. Add to LogBS by get value in V as index of LogBS and not in V by A
 
-factorList = G.var2factors{V(1)};
-edges = G.edges(V(1),:);
-
-for i = 1:length(edges)
-    if edges(i) == 1
-        factorList = union(factorList, G.var2factors{i});
-    end
-end
-
-
+factorList = unique([G.var2factors{V}]);
 Factor = struct('var', [], 'card', [], 'val', []);
 
 for i = factorList
-    Factor = FactorSum(Factor, F(i));
+    factor = F(i);
+    a = [];
+    for t = factor.var
+        if ~ismember(t, V)
+            a = [a; t, A(t)];
+        end
+    end
+    factor.val = log(factor.val);
+    factor = ObserveEvidence(factor, a);
+    Factor = FactorSum(Factor, factor);
 end
 
-Factor.val = Factor.val - min(Factor.val);
 
-[r, markovBlanket] = find(edges == 1);
-nominatorBlanket = union(markovBlanket, V(1));
+for i = 1:length(LogBS)
+    a = [];
+    for t = Factor.var
+        if ismember(t, V)
+            a=[a,i];
+        else
+            a=[a,A(t)];
+        end
+    end
+    LogBS(i) = GetValueOfAssignment(Factor, a);
+end
 
-T = FactorMarginalization(Factor, setdiff(Factor.var, nominatorBlanket));
-
-disp(T);
-
-nominator = GetValueOfAssignment(T, A(nominatorBlanket));
 
 
-T = FactorMarginalization(Factor, setdiff(Factor.var, markovBlanket));
-
-disp(T);
-
-denominator = GetValueOfAssignment(T, A(markovBlanket));
-
-disp(nominator/denominator);
-
-% calculate denom
-
-% Factor = struct('var', [], 'card', [], 'val', []);
-% for i = 1:length(F)
-%     if ~ismember(i, factorList)
-%         Factor = FactorProduct(Factor, F(i));
-%     end
-% end
+%%% Copy
+% uniqueFInds = unique([G.var2factors{V}]);
+% newF = F(uniqueFInds);
+% newA = repmat(A, d, 1);
+% newA(:,V) = repmat([1:d]', 1, length(V));
 % 
-% T = FactorMarginalization(Factor, V);
-% denominator = GetValueOfAssignment(T, A(2:end));
 % 
-% LogBS(A(V(1))) = nominator/denominator;
-
+% for i=1:length(newF)
+%     LogBS = LogBS + log(GetValueOfAssignment(newF(i), newA(:, newF(i).var)));
+% end;
+ 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Re-normalize to prevent underflow when you move back to probability space

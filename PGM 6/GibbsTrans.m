@@ -8,8 +8,14 @@
 %
 % Copyright (C) Daphne Koller, Stanford University, 2012
 
+% A = exampleINPUT.t7a1{1};
+% G = exampleINPUT.t7a2{1};
+% F = exampleINPUT.t7a3{1};
+
 function A = GibbsTrans(A, G, F)
 
+allVars = unique([F.var]);
+% randi('seed', 1);
 for i = 1:length(G.names)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % YOUR CODE HERE
@@ -22,6 +28,15 @@ for i = 1:length(G.names)
     % Also, note that randsample() requires arguments in raw probability space
     % be sure that the arguments you pass to it meet that criteria
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    V = i;
+    G = G;
+    F = F;
+    A = A;
+    BlogBS = BlockLogDistribution(V, G, F, A);
+    BlogBS = exp(BlogBS);
+    BlogBS = BlogBS / sum(BlogBS);
+    index = randsample(G.card(i), 1, true, BlogBS);
+    A(i) = index;
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end

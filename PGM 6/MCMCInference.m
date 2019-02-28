@@ -32,7 +32,9 @@
 %
 % Copyright (C) Daphne Koller, Stanford University, 2012
 
-function [M, all_samples] = MCMCInference(G, F, E, TransName, mix_time, ...
+
+
+%function [M, all_samples] = MCMCInference(G, F, E, TransName, mix_time, ...
                                                   num_samples, sampling_interval, A0)
 
 % observe the evidence
