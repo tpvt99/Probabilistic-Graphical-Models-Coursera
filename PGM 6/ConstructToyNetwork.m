@@ -8,6 +8,9 @@
 %
 % Copyright (C) Daphne Koller, Stanford University, 2012
 
+% on_diag_weight = 1;
+% off_diag_weight = 0.1;
+
 function [toy_network, toy_factors] = ConstructToyNetwork(on_diag_weight, off_diag_weight)
 
 n = 4;  % square length

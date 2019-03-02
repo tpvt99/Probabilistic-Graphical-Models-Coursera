@@ -5,8 +5,9 @@
 function logp = LogProbOfJointAssignment(F, A)
 
 % work in log-space to prevent underflow
-logp = 0.0;
+logp = 0;
 for i = 1:length(F)
     logp = logp + log(GetValueOfAssignment(F(i), A, 1:length(A)));
 end
+
 

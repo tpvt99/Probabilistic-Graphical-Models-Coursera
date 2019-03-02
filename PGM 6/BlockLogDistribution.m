@@ -68,47 +68,47 @@ LogBS = zeros(1, d);
 %5. Observe variable in V
 %6. Add to LogBS by get value in V as index of LogBS and not in V by A
 
-factorList = unique([G.var2factors{V}]);
-Factor = struct('var', [], 'card', [], 'val', []);
-
-for i = factorList
-    factor = F(i);
-    a = [];
-    for t = factor.var
-        if ~ismember(t, V)
-            a = [a; t, A(t)];
-        end
-    end
-    factor.val = log(factor.val);
-    factor = ObserveEvidence(factor, a);
-    Factor = FactorSum(Factor, factor);
-end
-
-
-for i = 1:length(LogBS)
-    a = [];
-    for t = Factor.var
-        if ismember(t, V)
-            a=[a,i];
-        else
-            a=[a,A(t)];
-        end
-    end
-    LogBS(i) = GetValueOfAssignment(Factor, a);
-end
+% factorList = unique([G.var2factors{V}]);
+% Factor = struct('var', [], 'card', [], 'val', []);
+% 
+% for i = factorList
+%     factor = F(i);
+%     a = [];
+%     for t = factor.var
+%         if ~ismember(t, V)
+%             a = [a; t, A(t)];
+%         end
+%     end
+%     factor.val = log(factor.val);
+%     factor = ObserveEvidence(factor, a);
+%     Factor = FactorSum(Factor, factor);
+% end
+% 
+% 
+% for i = 1:length(LogBS)
+%     a = [];
+%     for t = Factor.var
+%         if ismember(t, V)
+%             a=[a,i];
+%         else
+%             a=[a,A(t)];
+%         end
+%     end
+%     LogBS(i) = GetValueOfAssignment(Factor, a);
+% end
 
 
 
 %%% Copy
-% uniqueFInds = unique([G.var2factors{V}]);
-% newF = F(uniqueFInds);
-% newA = repmat(A, d, 1);
-% newA(:,V) = repmat([1:d]', 1, length(V));
-% 
-% 
-% for i=1:length(newF)
-%     LogBS = LogBS + log(GetValueOfAssignment(newF(i), newA(:, newF(i).var)));
-% end;
+uniqueFInds = unique([G.var2factors{V}]);
+newF = F(uniqueFInds);
+newA = repmat(A, d, 1);
+newA(:,V) = repmat([1:d]', 1, length(V));
+
+
+for i=1:length(newF)
+    LogBS = LogBS + log(GetValueOfAssignment(newF(i), newA(:, newF(i).var)));
+end;
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

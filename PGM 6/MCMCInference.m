@@ -32,10 +32,27 @@
 %
 % Copyright (C) Daphne Koller, Stanford University, 2012
 
+% G = exampleINPUT.t8a1{1};
+% F = exampleINPUT.t8a2{1};
+% E = exampleINPUT.t8a3{1};
+% TransName = exampleINPUT.t8a4{1};
+% mix_time = exampleINPUT.t8a5{1};
+% num_samples = exampleINPUT.t8a6{1};
+% sampling_interval = exampleINPUT.t8a7{1};
+% A0 = exampleINPUT.t8a8{1};
+% 
+% G = toy_network;
+% F = toy_factors;
+% E = [];
+% TransName = exampleINPUT.t8a4{1};
+% mix_time = exampleINPUT.t8a5{1};
+% num_samples = exampleINPUT.t8a6{1};
+% sampling_interval = exampleINPUT.t8a7{1};
+% A0 = ones(1,16) * 2;
 
 
-%function [M, all_samples] = MCMCInference(G, F, E, TransName, mix_time, ...
-                                                  num_samples, sampling_interval, A0)
+function [M, all_samples] = MCMCInference(G, F, E, TransName, mix_time, ...
+                                                 num_samples, sampling_interval, A0)
 
 % observe the evidence
 for i = 1:length(E),
@@ -78,14 +95,16 @@ if bSwendsenWang
               % Specify the q_{i,j}'s for Swendsen-Wang for variant 1
               %
               %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+                q_ij = 0.5;
               %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           elseif strcmp(TransName, 'MHSwendsenWang2')
               %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
               % YOUR CODE HERE 
               % Specify the q_{i,j}'s for Swendsen-Wang for variant 2
               %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+              assignments = repmat((1:edge_factor.card(1))', 1, length(edge_factor.var));
+              inds = AssignmentToIndex(assignments, edge_factor.card);
+              q_ij = sum(edge_factor.val(inds)) / sum(edge_factor.val);
               %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           else
               disp('WARNING: unrecognized Swendsen-Wang name');
@@ -122,6 +141,9 @@ for i = 1:max_iter
     %     is equivalent to
     %     foo2 = @foo;
     %     sol = foo2(bar);
+    A0 = Trans(A0, G, F);
+    
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % This is a dummy line added so that submit.m runs without an error
     % even if you have not coded anything.

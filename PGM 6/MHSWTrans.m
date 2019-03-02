@@ -11,6 +11,11 @@
 %
 % Copyright (C) Daphne Koller, Stanford University, 2012
 
+% A = exampleINPUT.t10a1{1};
+% G = exampleINPUT.t10a2{1};
+% F = exampleINPUT.t10a3{1};
+% variant = 2;
+
 function A = MHSWTrans(A, G, F, variant)
 
 %%%%%%%%%%%%%% Get Proposal %%%%%%%%%%%%%%
@@ -47,7 +52,8 @@ if variant == 1
     % Specify the log of the distribution (LogR) from 
     % which a new label for Y is selected for variant 1 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    LogR = log(ones(1,d)/d);
+    %G.q_list(:,3) = 0.5;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 elseif variant == 2
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -59,7 +65,13 @@ elseif variant == 2
     % before implementing this, one of the generated
     % data structures may be useful in implementing this section
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    LogR = BlockLogDistribution(selected_vars', G, F, A);
+%     for i = 1:length(G.q_list)
+%         u = G.q_list(i,1);
+%         v = G.q_list(i,2);
+%         fact = F(intersect(G.var2factors{u}, G.var2factors{v}));
+%         G.q_list(i, 3) = (fact.val(1) + fact.val(4)) / sum(f.val);
+%     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 else
     disp('WARNING: Unrecognized Swendsen-Wang Variant');
@@ -96,6 +108,17 @@ p_acceptance = 0.0;
 % the acceptance probabilitiy.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+Log_R1 = LogProbOfJointAssignment(F, A);
+Log_R2 = LogProbOfJointAssignment(F, A_prop);
+
+if variant == 2
+    p_acceptance = log_QY_ratio + Log_R2 - Log_R1 + LogR(old_value) - LogR(new_value);
+else
+    p_acceptance = log_QY_ratio + Log_R2 - Log_R1;
+end
+
+p_acceptance = min(1, exp(p_acceptance));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Accept or reject proposal
